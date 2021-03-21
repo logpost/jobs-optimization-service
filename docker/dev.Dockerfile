@@ -5,4 +5,4 @@ COPY . .
 RUN go get ./...
 RUN go get -u github.com/cosmtrek/air
 
-CMD air -c air.toml
+CMD air -c air-dev.toml

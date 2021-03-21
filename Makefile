@@ -1,2 +1,5 @@
 dev:
-	air -c air.toml
+	air -c air-dev.toml
+
+stag:
+	air -c air-stag.toml
