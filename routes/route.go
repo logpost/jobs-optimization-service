@@ -18,10 +18,10 @@ func Init(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER) *echo.
 	r	:=	e.Group("/job-opts")
 	{
 		r.GET("/healthcheck", func(c echo.Context) error { 
-		return c.String(http.StatusOK, "Service is Alive 🥳")
+			return c.String(http.StatusOK, "Service is Alive 🥳")
 		})
 
-		r.GET("/suggest/:job_id", usecase.SuggestJobs(mongoClient, logposter))
+		r.POST("/suggest", usecase.SuggestJobs(mongoClient, logposter))
 	}
 
 	return e

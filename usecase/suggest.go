@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"strconv"
+	// "strconv"
 	"log"
 	"fmt"
 	"net/http"
@@ -14,26 +14,34 @@ import (
 	
 )
 
+type JobInfo struct {
+	JobID	string		`json:"job_id"`
+	Hop		int			`json:"hop"`
+}
+
 func SuggestJobs(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER) echo.HandlerFunc {
 
 	return	func(c echo.Context) (err error) {
-		
-		jobID			:=	c.Param("job_id")
-		maxHop, err		:=	strconv.Atoi(c.QueryParam("hop"))
+
+		jobInfo := new(JobInfo)
+
+		if err = c.Bind(jobInfo); err != nil {
+			return
+		}
 
 		if err != nil {
 			log.Fatal(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		jobPicked, err	:=	mongoClient.GetJobInformation(jobID)
+		jobPicked, err	:=	mongoClient.GetJobInformation(jobInfo.JobID)
 		
 		if err != nil {
 			log.Fatal(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		jobs, err		:=	mongoClient.GetAvailableJobs(jobID)
+		jobs, err		:=	mongoClient.GetAvailableJobs(jobInfo.JobID)
 		
 		if err != nil {
 			log.Fatal(err)
@@ -44,7 +52,7 @@ func SuggestJobs(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER)
 		jobsClone		=	append(jobsClone, jobPicked)
 		adjJobs			:=	utility.TransformToAdjacencyList(jobsClone)
 
-		logposter.SuggestJobsByHop(adjJobs, jobPicked, &jobs, maxHop)
+		logposter.SuggestJobsByHop(adjJobs, jobPicked, &jobs, jobInfo.Hop)
 		fmt.Printf("\n\n\n\n#### RESULT \n\n %+v", logposter.Result)
 		return c.JSON(http.StatusOK, logposter.Result)
 
