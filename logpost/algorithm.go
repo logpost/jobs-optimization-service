@@ -20,17 +20,17 @@ type LOGPOSTER	struct {
 }
 
 type Result	struct	{
-	Summary		map[string]Summary
-	History		map[string]models.Job
+	Summary		map[string]Summary		`json:"summary"`
+	History		map[string]models.Job	`json:"history"`
 }
 
 type Summary struct {
-	SumCost				float64
-	SumOffer			float64
-	Profit				float64
-	DistanceToOrigin	float64
-	StartDate			string
-	EndDate				string
+	SumCost				float64			`json:"sum_cost"`
+	SumOffer			float64			`json:"sum_offer"`
+	Profit				float64			`json:"profit"`
+	DistanceToOrigin	float64			`json:"distance_to_origin"`
+	StartDate			string			`json:"start_date"`
+	EndDate				string			`json:"end_date"`
 }
 
 // MinimumCostBuffer struct for sending to minimum pipe
