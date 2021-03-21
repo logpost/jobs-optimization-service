@@ -157,9 +157,6 @@ func (logposter *LOGPOSTER) getJobMinimumCostParallel(jobPickedLocation *models.
 	
 }
 
-// LOGPOSTER.OSRMClient.CreateOSRM("http://osrm:5001/")
-// CreateOSRMClient("http://127.0.0.1:5001/")
-
 func CreateOSRMConnection(URL string) LOGPOSTER {
 
 	var logposter	LOGPOSTER
@@ -172,7 +169,7 @@ func CreateOSRMConnection(URL string) LOGPOSTER {
 
 }
 
-func (logposter *LOGPOSTER)	SuggestJobsByHop(adjJobs map[string]*models.Job, jobFirstPicked models.Job, jobs *[]models.Job, maxHop int) {
+func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adjJobs map[string]*models.Job, jobFirstPicked models.Job, jobs *[]models.Job, maxHop int) {
 
 	var minimumJobID			string
 	var minimumEndingCost		float64
@@ -195,18 +192,16 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(adjJobs map[string]*models.Job, job
 	logposter.Result.History	=	make(map[string]models.Job)
 	logposter.adjJobs			=	adjJobs
 
-	
 	jobsFiltered, _	:=	utility.JobsFiltering(jobFirstPicked, jobs)
 	jobs			=	&jobsFiltered
 
 	for _, job := range (*jobs) {
-		adjJobs[job.JobID.Hex()].Cost = utility.GetDrivingCostByDistance(adjJobs[job.JobID.Hex()].Distance, adjJobs[job.JobID.Hex()].Weight)
+		adjJobs[job.JobID.Hex()].Cost = utility.GetDrivingCostByDistance(adjJobs[job.JobID.Hex()].Distance * 1000, adjJobs[job.JobID.Hex()].Weight)
 	}
 
-	adjJobs[jobFirstPicked.JobID.Hex()].Cost = utility.GetDrivingCostByDistance(adjJobs[jobFirstPicked.JobID.Hex()].Distance, adjJobs[jobFirstPicked.JobID.Hex()].Weight)
+	adjJobs[jobFirstPicked.JobID.Hex()].Cost = utility.GetDrivingCostByDistance(adjJobs[jobFirstPicked.JobID.Hex()].Distance * 1000, adjJobs[jobFirstPicked.JobID.Hex()].Weight)
 
 	// Initial data selected by user
-	originLocation	:=	models.CreateLocation(float64(14.7995081), float64(100.6533706))
 	curentLocation	:=	originLocation
 
 	// Starting suggestion algorithm
@@ -222,22 +217,11 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(adjJobs map[string]*models.Job, job
 		logposter.adjJobs[jobPicked.JobID].Visited	=	true
 
 		jobsFiltered, _		:=	utility.JobsFiltering(*logposter.adjJobs[jobPicked.JobID], jobs)
-		
 		jobs				=	&jobsFiltered
 		
 		sumCost				+=	logposter.adjJobs[jobPicked.JobID].Cost
 		sumOffer			+=	logposter.adjJobs[jobPicked.JobID].OfferPrice
 		endDay				=	logposter.adjJobs[jobPicked.JobID].DropoffDate
-
-		logposter.Result.History[strconv.Itoa(currentHop)]	=	*logposter.adjJobs[jobPicked.JobID]
-		logposter.Result.Summary[strconv.Itoa(currentHop)]	=	Summary{
-			SumCost:			sumCost,
-			SumOffer:			sumOffer,
-			Profit:				sumOffer - sumCost,
-			DistanceToOrigin:	jobPicked.DistanceToOrigin,
-			StartDate:			jobFirstPicked.PickupDate.String(),
-			EndDate:			adjJobs[jobPicked.JobID].DropoffDate.String(),
-		}
 
 		jobPickedLocation	:=	models.CreateLocation(logposter.adjJobs[jobPicked.JobID].PickUpLocation.Latitude, logposter.adjJobs[jobPicked.JobID].PickUpLocation.Longitude)
 		prepareRouting		:=	logposter.OSRMClient.GetRouteInfo(&curentLocation, &jobPickedLocation)
@@ -248,15 +232,24 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(adjJobs map[string]*models.Job, job
 			sumCost				+=	preparingCost
 		}
 
-		if currentHop	<=	maxHop {
+		if currentHop	<=	maxHop || len((*jobs)) != 0 {
 			
 			minimumJobID, minimumEndingCost, minimumDistanceToOrigin, _	=	logposter.getJobMinimumCostParallel(&jobPickedLocation, &originLocation, jobs)
+			
+			logposter.Result.History[strconv.Itoa(currentHop)]	=	*logposter.adjJobs[jobPicked.JobID]
+			logposter.Result.Summary[strconv.Itoa(currentHop)]	=	Summary{
+				SumCost:			sumCost,
+				SumOffer:			sumOffer,
+				Profit:				sumOffer - sumCost,
+				DistanceToOrigin:	minimumDistanceToOrigin,
+				StartDate:			jobFirstPicked.PickupDate.String(),
+				EndDate:			adjJobs[jobPicked.JobID].DropoffDate.String(),
+			}
 
 			if minimumJobID	!=	"" {
 
 				heap.Push(&Queue, &pqueue.Item{
 					JobID:	minimumJobID,
-					DistanceToOrigin:	minimumDistanceToOrigin,
 				})
 				
 				curentLocation	=	models.CreateLocation(logposter.adjJobs[minimumJobID].DropOffLocation.Latitude, logposter.adjJobs[minimumJobID].DropOffLocation.Latitude)
@@ -264,7 +257,7 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(adjJobs map[string]*models.Job, job
 			}
 		}
 
-		if currentHop > maxHop	||	Queue.Len() == 0 || len((*jobs)) == 0 {
+		if currentHop > maxHop	||	Queue.Len() == 0 {
 			
 			if currentHop == 1 {
 				predictingDropOffLocation	:=	models.CreateLocation(logposter.adjJobs[jobPicked.JobID].PickUpLocation.Latitude, logposter.adjJobs[jobPicked.JobID].PickUpLocation.Longitude)
@@ -280,8 +273,6 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(adjJobs map[string]*models.Job, job
 			} else {
 				sumCost	+=	minimumEndingCost
 			}
-
-			// fmt.Println("\nCURRENT_HOP: ", currentHop)
 
 			break
 

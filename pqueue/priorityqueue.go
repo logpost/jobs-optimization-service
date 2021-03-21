@@ -1,15 +1,14 @@
 package pqueue
 
-import (
-	"github.com/logpost/jobs-optimization-service/models"
-)
+// import (
+// 	"github.com/logpost/jobs-optimization-service/models"
+// )
 
 // An Item is something we manage in a priority queue.
 type Item struct {
-	Job 				*models.Job
+	// Job 				*models.Job
 	Profit				float64
 	JobID				string
-	DistanceToOrigin	float64
 	index				int
 }
 

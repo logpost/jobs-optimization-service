@@ -32,7 +32,7 @@ func GetDrivingCostByDistance(distance, weight float64) float64 {
 		costOilPrice = oilPrice / 2	// TRUCK DRIVE WHEN NO LOAD.
 	}
 
-	return (distance / changeMToKM ) * costOilPrice
+	return (distance / changeMToKM) * costOilPrice
 	
 }
 
