@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"log"
 	"fmt"
 	"context"
 
@@ -38,7 +37,7 @@ func CreateMongoConnection(config config.DatabaseConfig) MongoClient {
 	err	=	client.Ping(context.TODO(), nil)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	mongoClient.session	= client
@@ -65,7 +64,7 @@ func changeStream(routineCtx context.Context, stream *mongo.ChangeStream) {
 
 }
 
-func (client MongoClient) WatchJobs() { 
+func (client *MongoClient) WatchJobs() { 
 
 	coll			:=	client.session.Database(client.config.DatabaseName).Collection(COLLECTION_JOBS)
 	cursor, err		:=	coll.Watch(context.TODO(), mongo.Pipeline{})
@@ -79,7 +78,7 @@ func (client MongoClient) WatchJobs() {
 
 }
 
-func (client MongoClient) GetAvailableJobs(jobID string) ([]models.Job, error) {
+func (client *MongoClient) GetAvailableJobs(jobID string) ([]models.Job, error) {
 	
 	var result []models.Job
 	
@@ -98,31 +97,31 @@ func (client MongoClient) GetAvailableJobs(jobID string) ([]models.Job, error) {
 	cursor, err			:=	coll.Find(context.TODO(), filter, opts)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	if err = cursor.All(context.TODO(), &result); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	return result, err
 
 }
 
-func (client MongoClient) GetJobInformation(jobID string) (models.Job, error) {
+func (client *MongoClient) GetJobInformation(jobID string) (models.Job, error) {
 	
 	var result models.Job
 
 	coll				:=	client.session.Database(client.config.DatabaseName).Collection(COLLECTION_JOBS)
 	jobIDObjectID,	_	:=	primitive.ObjectIDFromHex(jobID)
-	filter				:=	bson.M{ "job_id": jobIDObjectID }
+	filter				:=	bson.D{ {"job_id", jobIDObjectID} }
 	opts				:=	options.FindOne().SetSort(bson.D{{ "created_at", 1 }})
 	err					:=	coll.FindOne(context.TODO(), filter, opts).Decode(&result)
 	
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
-
+	
 	return result, err
 
 }

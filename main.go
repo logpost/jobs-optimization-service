@@ -19,8 +19,6 @@ var (
 	osrmConfig		config.OSRMConfig
 	PORT			string
 	logposter		logpost.LOGPOSTER
-	// jobs			[]models.Job
-	// pipeJobs		chan []models.Job
 )
 
 func init() {
@@ -57,9 +55,10 @@ func main() {
 
 	e	:=	route.Init(&mongoClient, &logposter)
 	
-	e.Use(middleware.Logger())
-	e.Use(middleware.Gzip())
-	e.Use(middleware.Recover())
+	e.Debug				=	false
+	e.HideBanner		=	true
+
+	e.Use(middleware.Logger(), middleware.Recover(), middleware.Gzip())
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: appConfig.OriginAllowed,

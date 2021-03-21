@@ -2,7 +2,6 @@ package usecase
 
 import (
 	// "strconv"
-	"log"
 	"fmt"
 	"net/http"
 
@@ -28,26 +27,19 @@ func SuggestJobs(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER)
 		body := new(Body)
 
 		if err = c.Bind(body); err != nil {
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "Body is invalid.")
 		}
-
-		if err != nil {
-			log.Fatal(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
+		
 		jobPicked, err	:=	mongoClient.GetJobInformation(body.JobID)
 		
 		if err != nil {
-			log.Fatal(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		jobs, err		:=	mongoClient.GetAvailableJobs(body.JobID)
 		
 		if err != nil {
-			log.Fatal(err)
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		jobsClone		:=	jobs
