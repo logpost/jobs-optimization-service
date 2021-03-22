@@ -1,6 +1,7 @@
 FROM golang:1.16
 WORKDIR /go/src/github.com/logpost/jobs-optimization-service
 
+
 ARG GIT_ACCESS_TOKEN_CURL_CONFIG
 
 COPY . /go/src/github.com/logpost/jobs-optimization-service
@@ -10,8 +11,10 @@ RUN mkdir conf && mv -f config.toml conf
 RUN go get ./...
 RUN go build -mod=readonly -v -o ./jobs-optimization-svc
  
-
 EXPOSE 8083
-ENV KIND=stagging 
+
+ENV GO111MODULE=on
+ENV PORT=${PORT}
+ENV KIND=stagging
 
 CMD ["./jobs-optimization-svc"]

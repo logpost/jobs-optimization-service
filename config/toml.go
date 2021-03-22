@@ -19,12 +19,14 @@ type DatabaseConfig struct {
 
 type AppConfig	struct {
 	Kind			string
+	Host			string
 	Port			string
 	OriginAllowed	[]string
 }
 
 type Configuration struct { 
 	Kind			string
+	Host			string
 	Port			string
 	OriginAllowed 	[]string
 	DatabaseURI		string

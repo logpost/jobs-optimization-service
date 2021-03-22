@@ -30,6 +30,7 @@ func init() {
 
 	appConfig		=	config.AppConfig{
 		Kind:			configuration.Kind,
+		Host:			configuration.Host,
 		Port:			configuration.Port,
 		OriginAllowed:	configuration.OriginAllowed,
 	}
@@ -65,5 +66,5 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
-	e.Logger.Fatal(e.Start(":" + PORT))
+	e.Logger.Fatal(e.Start(appConfig.Host + ":" + PORT))
 } 
