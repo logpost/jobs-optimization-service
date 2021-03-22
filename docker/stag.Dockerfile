@@ -9,7 +9,7 @@ RUN mkdir conf && mv -f config.toml conf
 COPY go.* ./
 RUN go mod download
 
-COPY . /go/src/github.com/logpost/jobs-optimization-service
+COPY . .
 RUN go build -mod=readonly -v -o ./jobs-optimization-svc
  
 FROM debian:buster-slim
@@ -19,7 +19,7 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/github.com/logpost/jobs-optimization-service/jobs-optimization-svc .
-COPY --from=builder /go/src/github.com/logpost/jobs-optimization-service/conf /go/src/github.com/logpost/jobs-optimization-service/jobs-optimization-svc conf/
+COPY --from=builder /go/src/github.com/logpost/jobs-optimization-service/conf conf/
 
 ENV GO111MODULE=on
 ENV PORT=${PORT}
