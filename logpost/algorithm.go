@@ -236,8 +236,8 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 			
 			minimumJobID, minimumEndingCost, minimumDistanceToOrigin, _	=	logposter.getJobMinimumCostParallel(&jobPickedLocation, &originLocation, jobs)
 			
-			logposter.Result.History[strconv.Itoa(currentHop)]	=	*logposter.adjJobs[jobPicked.JobID]
-			logposter.Result.Summary[strconv.Itoa(currentHop)]	=	Summary{
+			logposter.Result.History[strconv.Itoa(currentHop - 1)]	=	*logposter.adjJobs[jobPicked.JobID]
+			logposter.Result.Summary[strconv.Itoa(currentHop - 1)]	=	Summary{
 				SumCost:			sumCost,
 				SumOffer:			sumOffer,
 				Profit:				sumOffer - sumCost,
