@@ -1,0 +1,17 @@
+[ Stagging ]
+Kind = "Stagging"
+Host = "0.0.0.0"
+Port = "8083"
+OriginAllowed = ["http://127.0.0.1:3000", "https://logpost.netlify.app"]
+DatabaseURI = "mongodb+srv://logpost:logpost@cluster0.j9jsp.mongodb.net/logpost-stag?retryWrites=true&w=majority"
+DatabaseName = "logpost-stag"
+OSRMBackendURI = "https://osrm-backend-logpost-stag-qjrfn6j7kq-as.a.run.app/"
+
+[ Development ]
+Kind = "Development"
+Host = "127.0.0.1"
+Port = "8083"
+OriginAllowed = ["*"]
+DatabaseURI = "mongodb://rydell-router-01,rydell-router-02/logpost-database?authSource=logpost-database"
+DatabaseName = "logpost-database"
+OSRMBackendURI = "http://osrm:5001/"
