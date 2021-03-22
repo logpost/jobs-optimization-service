@@ -2,7 +2,7 @@ package usecase
 
 import (
 	// "strconv"
-	"fmt"
+	// "fmt"
 	"net/http"
 
 	"github.com/logpost/jobs-optimization-service/adapter"
@@ -49,7 +49,7 @@ func SuggestJobs(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER)
 		originLocation	:=	models.CreateLocation(float64(body.OriginLocation.Latitude), float64(body.OriginLocation.Longitude))
 
 		logposter.SuggestJobsByHop(originLocation, adjJobs, jobPicked, &jobs, body.Hop)
-		fmt.Printf("\n\n\n\n#### RESULT \n\n %+v", logposter.Result)
+		// fmt.Printf("\n\n\n\n#### RESULT \n\n %+v", logposter.Result)
 		return c.JSON(http.StatusOK, logposter.Result)
 
 	}

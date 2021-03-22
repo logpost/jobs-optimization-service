@@ -3,8 +3,8 @@ package logpost
 import (
 	"strconv"
 	"sync"
-	"time"
-	"fmt"
+	// "time"
+	// "fmt"
 	"container/heap"
 	"github.com/logpost/jobs-optimization-service/pqueue"
 	"github.com/logpost/jobs-optimization-service/utility"
@@ -42,10 +42,10 @@ type MinimumCostBuffer struct {
 	minimumPrepare				float64
 }
 
-func timeTrack(start time.Time) {
-	elapsed	:=	time.Since(start)
-	fmt.Printf("\nTOOK:\t\t%s\n", elapsed)
-}
+// func timeTrack(start time.Time) {
+// 	elapsed	:=	time.Since(start)
+// 	fmt.Printf("\nTOOK:\t\t%s\n", elapsed)
+// }
 
 func (logposter *LOGPOSTER) getJobMinimumCost(curentLocation *models.Location, originLocation *models.Location, minimumCostPipe chan MinimumCostBuffer, waitGroup *sync.WaitGroup, jobs *[]models.Job, startIndex int, endIndex int) {
 	
@@ -87,7 +87,7 @@ func (logposter *LOGPOSTER) getJobMinimumCost(curentLocation *models.Location, o
 		} 
 	}
 
-	fmt.Printf("\n### MINIMUM PREDICT:\nINDEX:\t\t%s\nCOST:\t\t%f\nCOST_PREPARE:\t%f\nCOST_ENDING:\t%f\n", minimumJobID, minimumCost, minimumPrepare, minimumEndingCost)
+	// fmt.Printf("\n### MINIMUM PREDICT:\nINDEX:\t\t%s\nCOST:\t\t%f\nCOST_PREPARE:\t%f\nCOST_ENDING:\t%f\n", minimumJobID, minimumCost, minimumPrepare, minimumEndingCost)
 	 
 	buffer	:=	MinimumCostBuffer{
 		minimumJobID, minimumEndingCost, minimumDistanceToOrigin, minimumCost, minimumPrepare,
@@ -163,7 +163,7 @@ func CreateOSRMConnection(URL string) LOGPOSTER {
 	logposter.OSRMClient	=	osrm.OSRM{}
 	logposter.OSRMClient.CreateOSRM(URL)
 	
-	fmt.Println("Connected to OSRM backend 🎃")
+	// fmt.Println("Connected to OSRM backend 🎃")
 
 	return logposter
 
@@ -181,12 +181,12 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 	sumCost			:=	0.0
 	sumOffer		:=	0.0
 	currentHop		:=	0
-	workingDays 	:=	1
-	maxWorkingDays	:=	-1
-	startDay	 	:=	time.Now()
-	endDay			:=	time.Now()
+	// workingDays 	:=	1
+	// maxWorkingDays	:=	-1
+	// startDay	 	:=	time.Now()
+	// endDay			:=	time.Now()
 
-	start						:=	time.Now()
+	// start						:=	time.Now()
 
 	logposter.Result.Summary	=	make(map[string]Summary)
 	logposter.Result.History	=	make(map[string]models.Job)
@@ -221,7 +221,7 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 		
 		sumCost				+=	logposter.adjJobs[jobPicked.JobID].Cost
 		sumOffer			+=	logposter.adjJobs[jobPicked.JobID].OfferPrice
-		endDay				=	logposter.adjJobs[jobPicked.JobID].DropoffDate
+		// endDay				=	logposter.adjJobs[jobPicked.JobID].DropoffDate
 
 		jobPickedLocation	:=	models.CreateLocation(logposter.adjJobs[jobPicked.JobID].PickUpLocation.Latitude, logposter.adjJobs[jobPicked.JobID].PickUpLocation.Longitude)
 		prepareRouting		:=	logposter.OSRMClient.GetRouteInfo(&curentLocation, &jobPickedLocation)
@@ -278,22 +278,22 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 
 		}
 
-		fmt.Println("\nCURRENT_HOP: ", currentHop)
+		// fmt.Println("\nCURRENT_HOP: ", currentHop)
 
 	}
 
-	fmt.Printf("\n## SUMARY ##\n")
+	// fmt.Printf("\n## SUMARY ##\n")
 
-	timeTrack(start)
+	// timeTrack(start)
 	
-	fmt.Printf("SUM_OFFER:\t\t%f\n",		sumOffer)
-	fmt.Printf("SUM_COST:\t\t%f\n",			sumCost)
-	fmt.Printf("SUM_PROFIT:\t\t%f\n",		sumOffer - sumCost)
-	fmt.Printf("START_DATE:\t\t%s\n",		startDay.String())
-	fmt.Printf("END_DATE:\t\t%s\n",			endDay.String())
-	fmt.Printf("DISTANCE_TO_ORIGIN:\t%f\n",	minimumDistanceToOrigin)
+	// fmt.Printf("SUM_OFFER:\t\t%f\n",		sumOffer)
+	// fmt.Printf("SUM_COST:\t\t%f\n",			sumCost)
+	// fmt.Printf("SUM_PROFIT:\t\t%f\n",		sumOffer - sumCost)
+	// fmt.Printf("START_DATE:\t\t%s\n",		startDay.String())
+	// fmt.Printf("END_DATE:\t\t%s\n",			endDay.String())
+	// fmt.Printf("DISTANCE_TO_ORIGIN:\t%f\n",	minimumDistanceToOrigin)
 
-	fmt.Println("DEBUG: ", Queue, workingDays, maxWorkingDays, startDay, endDay)
+	// fmt.Println("DEBUG: ", Queue, workingDays, maxWorkingDays, startDay, endDay)
 
 
 }
