@@ -36,6 +36,7 @@ type Configuration struct {
 
 // Config is struct for parse data from toml file
 type Config struct {
+	Production		Configuration
 	Stagging		Configuration
 	Development		Configuration
 }
@@ -56,6 +57,8 @@ func (c *Config) GetConfig() Configuration {
 			return	c.Development
 		case "stagging":
 			return	c.Stagging
+		case "production":
+			return	c.Production
 		default:
 			panic("required environment vairble !" + KIND)
 	}

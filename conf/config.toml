@@ -1,3 +1,12 @@
+[ Production ]
+Kind = "Production"
+Host = "0.0.0.0"
+Port = "8083"
+OriginAllowed = ["http://127.0.0.1:3000", "https://logpost.netlify.app"]
+DatabaseURI = "mongodb+srv://logpost:logpost@cluster0.j9jsp.mongodb.net/logpost-stag?retryWrites=true&w=majority"
+DatabaseName = "logpost-stag"
+OSRMBackendURI = "https://osrm-backend-logpost-stag-qjrfn6j7kq-as.a.run.app/"
+
 [ Stagging ]
 Kind = "Stagging"
 Host = "0.0.0.0"
