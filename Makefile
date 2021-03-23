@@ -21,3 +21,12 @@ hand-gcr-to-stag-step-1:
 hand-gcr-to-stag-step-2:
 	git push -u origin stag-release-image; \
 	git checkout develop;
+
+hand-gcr-to-prod-step-1:
+	git push -u origin develop; \
+	git checkout prod-release-image; \
+	git pull origin develop;
+
+hand-gcr-to-prod-step-2:
+	git push -u origin prod-release-image; \
+	git checkout develop;
