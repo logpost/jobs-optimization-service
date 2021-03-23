@@ -49,8 +49,9 @@ type MinimumCostBuffer struct {
 
 func (logposter *LOGPOSTER) getJobMinimumCost(curentLocation *models.Location, originLocation *models.Location, minimumCostPipe chan MinimumCostBuffer, waitGroup *sync.WaitGroup, jobs *[]models.Job, startIndex int, endIndex int) {
 	
-	defer waitGroup.Done()
 	
+	defer waitGroup.Done()
+
 	minimumJobID			:=	""
 	minimumCost				:=	9999999.999
 	minimumPrepare			:=	0.0
@@ -64,8 +65,8 @@ func (logposter *LOGPOSTER) getJobMinimumCost(curentLocation *models.Location, o
 			predictingPickUpLocation	:=	models.CreateLocation(logposter.adjJobs[(*jobs)[index].JobID.Hex()].PickUpLocation.Latitude,	logposter.adjJobs[(*jobs)[index].JobID.Hex()].PickUpLocation.Longitude)
 			predictingDropOffLocation	:=	models.CreateLocation(logposter.adjJobs[(*jobs)[index].JobID.Hex()].DropOffLocation.Latitude,	logposter.adjJobs[(*jobs)[index].JobID.Hex()].DropOffLocation.Longitude)
 
-			prepareRouting				:=	logposter.OSRMClient.GetRouteInfo(curentLocation,	&predictingPickUpLocation)
-			endingRouting				:=	logposter.OSRMClient.GetRouteInfo(&predictingDropOffLocation,	originLocation)
+			prepareRouting, _			:=	logposter.OSRMClient.GetRouteInfo(curentLocation,	&predictingPickUpLocation)
+			endingRouting, _			:=	logposter.OSRMClient.GetRouteInfo(&predictingDropOffLocation,	originLocation)
 
 			if prepareRouting != nil && endingRouting != nil {
 				prepareRoutingDistance	:=	prepareRouting.Routes[0].Distance
@@ -169,7 +170,7 @@ func CreateOSRMConnection(URL string) LOGPOSTER {
 
 }
 
-func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adjJobs map[string]*models.Job, jobFirstPicked models.Job, jobs *[]models.Job, maxHop int) {
+func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adjJobs map[string]*models.Job, jobFirstPicked models.Job, jobs *[]models.Job, maxHop int) error {
 
 	var minimumJobID			string
 	var minimumEndingCost		float64
@@ -224,7 +225,11 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 		// endDay				=	logposter.adjJobs[jobPicked.JobID].DropoffDate
 
 		jobPickedLocation	:=	models.CreateLocation(logposter.adjJobs[jobPicked.JobID].PickUpLocation.Latitude, logposter.adjJobs[jobPicked.JobID].PickUpLocation.Longitude)
-		prepareRouting		:=	logposter.OSRMClient.GetRouteInfo(&curentLocation, &jobPickedLocation)
+		prepareRouting, err	:=	logposter.OSRMClient.GetRouteInfo(&curentLocation, &jobPickedLocation)
+
+		if err != nil {
+			return err
+		}
 
 		if prepareRouting	!=	nil {
 			preparingDistance	:=	prepareRouting.Routes[0].Distance
@@ -238,7 +243,7 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 			
 			logposter.Result.History[strconv.Itoa(currentHop - 1)]	=	*logposter.adjJobs[jobPicked.JobID]
 			logposter.Result.Summary[strconv.Itoa(currentHop - 1)]	=	Summary{
-				SumCost:			sumCost,
+				SumCost:			sumCost + minimumEndingCost,
 				SumOffer:			sumOffer,
 				Profit:				sumOffer - sumCost,
 				DistanceToOrigin:	minimumDistanceToOrigin,
@@ -259,9 +264,10 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 
 		if currentHop > maxHop	||	Queue.Len() == 0 {
 			
+			// Imposible case (need recheck)
 			if currentHop == 1 {
 				predictingDropOffLocation	:=	models.CreateLocation(logposter.adjJobs[jobPicked.JobID].PickUpLocation.Latitude, logposter.adjJobs[jobPicked.JobID].PickUpLocation.Longitude)
-				endingRouting				:=	logposter.OSRMClient.GetRouteInfo(&predictingDropOffLocation, &originLocation)
+				endingRouting, _			:=	logposter.OSRMClient.GetRouteInfo(&predictingDropOffLocation, &originLocation)
 
 				if endingRouting	!=	nil {
 					endingRoutingDistance	:=	endingRouting.Routes[0].Distance
@@ -279,7 +285,7 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 		}
 
 		// fmt.Println("\nCURRENT_HOP: ", currentHop)
-
+		
 	}
 
 	// fmt.Printf("\n## SUMARY ##\n")
@@ -294,6 +300,5 @@ func (logposter *LOGPOSTER)	SuggestJobsByHop(originLocation models.Location, adj
 	// fmt.Printf("DISTANCE_TO_ORIGIN:\t%f\n",	minimumDistanceToOrigin)
 
 	// fmt.Println("DEBUG: ", Queue, workingDays, maxWorkingDays, startDay, endDay)
-
-
+	return nil
 }

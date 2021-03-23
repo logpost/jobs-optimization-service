@@ -1,10 +1,10 @@
 package osrm
 
 import (
-	"strconv"
+	// "strconv"
 	"fmt"
-	"encoding/json"
-	"io/ioutil"
+	// "encoding/json"
+	// "io/ioutil"
 	"net/url"
 	"github.com/karmadon/gosrm"
 	"github.com/paulmach/go.geo"
@@ -30,7 +30,7 @@ func (osrm *OSRM) CreateOSRM(uri string) {
 }
 
 // GetRouteInfo function for get information routing.
-func (osrm *OSRM) GetRouteInfo(source, dest *models.Location) *gosrm.OSRMResponse {	
+func (osrm *OSRM) GetRouteInfo(source, dest *models.Location) (*gosrm.OSRMResponse, error) {	
 
 	routeRequest := &gosrm.RouteRequest{
 		Coordinates: geo.PointSet{
@@ -43,21 +43,21 @@ func (osrm *OSRM) GetRouteInfo(source, dest *models.Location) *gosrm.OSRMRespons
 
 	if err != nil {
 		fmt.Println(err)
-		panic(err.Error())
+		// panic(err.Error())
 	}
 
-	loggingRouteToJSON(response, source, dest)
+	// loggingRouteToJSON(response, source, dest)
 
-	return response
+	return response, err
 }
 
-// loggingLastRoute function for logging response from route btw points.
-func loggingRouteToJSON(response *gosrm.OSRMResponse, source, dest *models.Location) {
-	sourceLatlong	:= strconv.FormatFloat(source.Latitude, 'f', 3, 64) + "," + strconv.FormatFloat(source.Longitude, 'f', 3, 64)
-	destLatlong 	:= strconv.FormatFloat(dest.Latitude, 'f', 3, 64) + "," + strconv.FormatFloat(dest.Longitude, 'f', 3, 64)
+// // loggingLastRoute function for logging response from route btw points.
+// func loggingRouteToJSON(response *gosrm.OSRMResponse, source, dest *models.Location) {
+// 	sourceLatlong	:= strconv.FormatFloat(source.Latitude, 'f', 3, 64) + "," + strconv.FormatFloat(source.Longitude, 'f', 3, 64)
+// 	destLatlong 	:= strconv.FormatFloat(dest.Latitude, 'f', 3, 64) + "," + strconv.FormatFloat(dest.Longitude, 'f', 3, 64)
 
-	saveFile, _ := json.MarshalIndent(response, "", " ")
-	outputPath	:= "output/" + sourceLatlong + "_" + destLatlong + "-response-coordinates-osrm.json"
+// 	saveFile, _ := json.MarshalIndent(response, "", " ")
+// 	outputPath	:= "output/" + sourceLatlong + "_" + destLatlong + "-response-coordinates-osrm.json"
 
-	_ = ioutil.WriteFile(outputPath, saveFile, 0644)
-}
+// 	_ = ioutil.WriteFile(outputPath, saveFile, 0644)
+// }

@@ -52,7 +52,6 @@ func main() {
 
 	logposter	=	logpost.CreateOSRMConnection(osrmConfig.OSRMBackendURI)
 	mongoClient	:=	adapter.CreateMongoConnection(databaseConfig)
-	mongoClient.WatchJobs()
 
 	e	:=	route.Init(&mongoClient, &logposter)
 	

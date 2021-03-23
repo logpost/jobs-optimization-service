@@ -2,7 +2,7 @@ package usecase
 
 import (
 	// "strconv"
-	// "fmt"
+	"fmt"
 	"net/http"
 
 	"github.com/logpost/jobs-optimization-service/adapter"
@@ -27,7 +27,7 @@ func SuggestJobs(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER)
 		body := new(Body)
 
 		if err = c.Bind(body); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Body is invalid.")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error : Body is invalid.")
 		}
 		
 		jobPicked, err	:=	mongoClient.GetJobInformation(body.JobID)
@@ -48,8 +48,13 @@ func SuggestJobs(mongoClient *adapter.MongoClient, logposter *logpost.LOGPOSTER)
 
 		originLocation	:=	models.CreateLocation(float64(body.OriginLocation.Latitude), float64(body.OriginLocation.Longitude))
 
-		logposter.SuggestJobsByHop(originLocation, adjJobs, jobPicked, &jobs, body.Hop)
-		// fmt.Printf("\n\n\n\n#### RESULT \n\n %+v", logposter.Result)
+		err				=	logposter.SuggestJobsByHop(originLocation, adjJobs, jobPicked, &jobs, body.Hop)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error : No route in the system.")
+		}
+
 		return c.JSON(http.StatusOK, logposter.Result)
 
 	}
