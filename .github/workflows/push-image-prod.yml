@@ -26,7 +26,7 @@ jobs:
 
             - name: Build
               run: |
-                  docker build -f ./docker/prod.Dockerfile . -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCR_IMAGE_NAME_PROD }}
+                  docker build -f ./docker/prod.Dockerfile . -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCR_IMAGE_NAME_PROD }} --build-arg GIT_ACCESS_TOKEN_CURL_CONFIG=${{ secrets.GIT_ACCESS_TOKEN_CURL_CONFIG }}
 
             - name: Push
               run: |

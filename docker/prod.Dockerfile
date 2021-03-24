@@ -6,7 +6,8 @@ ARG GIT_ACCESS_TOKEN_CURL_CONFIG
 COPY go.* ./
 RUN go mod download
 COPY . .
-
+RUN curl -o config.toml https://${GIT_ACCESS_TOKEN_CURL_CONFIG}@raw.githubusercontent.com/logpost/logpost-environment/master/environment/jobs-optimization-service/config.toml
+RUN mkdir conf && mv -f config.toml conf
 RUN go build -mod=readonly -v -o ./jobs-optimization-svc 
 
 FROM debian:buster-slim
